@@ -1,16 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export function middleware(request) {
-  //console.log('Middleware is working!');
-  //console.log(`Request URL: ${request.url}`);
-  //console.log(`Request Method: ${request.method}`);
-
+  const { pathname } = request.nextUrl;
+  const cookies = request.cookies;
+  const authToken = cookies.get('site-logged');
+  if (pathname.startsWith('/dashboard') || pathname.startsWith('/another-restricted-page')) {
+    if (!authToken) {
+      const url = new URL('/login', request.url);
+      return NextResponse.redirect(url);
+    }
+  }
   const response = NextResponse.next();
   response.headers.set('X-Middleware-Check', 'middleware is working');
   return response;
 }
 
-
 export const config = {
-  matcher: '/'
+  matcher: ['/dashboard/:path*', '/another-restricted-page/:path*', '/login'],
 };

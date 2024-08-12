@@ -4,19 +4,20 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);  
 
   useEffect(() => {
-    const checkAuth = () => {
-      const authToken = sessionStorage.getItem('authToken');
-      const authStatus = !!authToken;      
-      setIsAuthenticated(authStatus);
+    const fetchAuthStatus = async () => {
+      try {
+        const response = await fetch('/api/user/check-auth');
+        const data = await response.json();
+        setIsAuthenticated(data.isAuthenticated);
+      } catch (error) {
+        console.error('Error fetching auth status:', error);
+      }
     };
-    checkAuth();
-    window.addEventListener('storage', checkAuth);
-    return () => {
-      window.removeEventListener('storage', checkAuth);
-    };
+
+    fetchAuthStatus();
   }, []);
 
   const login = () => {
@@ -24,7 +25,7 @@ export const AuthProvider = ({ children }) => {
   };
  
   const logout = () => {
-    sessionStorage.removeItem('authToken');
+    document.cookie = 'site-logged=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
     setIsAuthenticated(false);
   };
 

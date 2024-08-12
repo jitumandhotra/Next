@@ -28,7 +28,7 @@ export default function Page() {
     formData.append('password', password);
     formData.append('profilePhoto', profilePhoto);
     try {
-      const response = await fetch('/api/register', {
+      const response = await fetch('/api/user/register', {
         method: 'POST',
         body: formData,
       });

@@ -1,7 +1,6 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
-import { authenticate } from '@/app/lib/actions';
 import { useAuth } from '@/app/context/AuthContext';
 import Link from 'next/link'
 
@@ -15,22 +14,35 @@ export default function Page() {
   const { login } = useAuth();
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const formData = { email, password };
+    const formData = { email, password, rememberMe};
     try {
-      const authUser = await authenticate(null, formData);      
-      if (authUser && authUser.success) {
-        sessionStorage.setItem('authToken', authUser.user.sessionToken); 
+      const response = await fetch('/api/user/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+      if (!response.ok) {
+        const errorMessage = `HTTP Error: ${response.status}`;
+        throw new Error(errorMessage);
+      }
+      const authUser = await response.json();
+      if (authUser.error) {
+        throw new Error(authUser.error);
+      }
+      if (authUser.success) {
+        login(authUser.user.sessionToken); 
         setError('');
-        login();
-        setSuccess('Login Sucessfully.');
+        setSuccess('Login Successfully.');
         setTimeout(() => {
           router.push('/dashboard');
-        }, 1000);      
+        }, 1000);
       } else {
-        setError(authUser); 
+        setError('Unexpected error occurred.');
       }
     } catch (error) {
-      setError('An unexpected error occurred: ' + error.message);
+      setError(error.message);
       console.error('Login failed:', error.message);
     }
   };
