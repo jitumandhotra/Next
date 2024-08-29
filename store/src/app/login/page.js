@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { useAuth } from '@/app/context/AuthContext';
 import Link from 'next/link'
-import Loader from '@/app/components/Molecules/Loader';
+
 
 
 export default function Page() {
@@ -14,13 +14,11 @@ export default function Page() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const { login } = useAuth();
-  const [loading, setLoading] = useState(false);
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setLoading(true);
+    
     const formData = { email, password, rememberMe};
-    try {
-      setLoading(true);
+    try {      
       const response = await fetch('/api/user/login', {
         method: 'POST',
         headers: {
@@ -39,9 +37,8 @@ export default function Page() {
       if (authUser.success) {
         login(authUser.user.sessionToken); 
         setError('');
-        setSuccess('Login Successfully.');
-        setTimeout(() => {
-          setLoading(false);
+        setSuccess('Login Successfully.');        
+        setTimeout(() => {          
           router.push('/dashboard');
         }, 1000);
       } else {
@@ -51,7 +48,7 @@ export default function Page() {
       setError(error.message);
       console.error('Login failed:', error.message);
     }finally {
-      setLoading(false); 
+      
     }
 
   };
@@ -59,7 +56,7 @@ export default function Page() {
   return (
     <section className="bg-gray-50 dark:bg-gray-900">
       <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">    
-      {loading ? <Loader /> : (    
+        
         <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
           <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
             <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
@@ -146,7 +143,7 @@ export default function Page() {
             </form>
           </div>
         </div>
-        )}
+        
       </div>
     </section>
   );
